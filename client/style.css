@@ -1,8 +1,8 @@
 /* General body style */
 body {
-    background-color: #f5f5f5;
-    font-family: 'Arial', sans-serif;
-    color: #333;
+    background-color: #F5EAF5; /* Soft pink background */
+    font-family: 'Comic Sans MS', cursive, sans-serif; /* More playful font */
+    color: #6a1b9a; /* Dark purple for contrast */
     padding: 10px;
 }
 
@@ -17,10 +17,11 @@ body {
 /* Style for the title */
 #title {
     text-align: center;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    padding: 10px;
-    font-size: 24px;
+    border: 2px dotted #A79BCB; /* Light purple dotted border */
+    background-color: #FFD1DC; /* Light pink background */
+    padding: 15px;
+    font-size: 28px; /* Slightly larger font */
+    font-weight: bold; /* Bold font */
     color: #333;
     margin-bottom: 20px;
 }
@@ -29,8 +30,8 @@ body {
 #searchOptions {
     display: flex;
     padding: 10px;
-    background-color: #eee;
-    border-radius: 5px;
+    background-color: #B8E0F2; /* Light blue background */
+    border-radius: 8px; /* More rounded borders */
     margin-bottom: 10px;
 }
 
@@ -38,27 +39,28 @@ body {
 #searchOptions input[type="text"],
 #searchOptions button[type="button"],
 #searchOptions select {
-    padding: 8px;
+    padding: 10px;
     margin: 5px;
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    border: 2px solid #FFB6C1; /* Soft pink border */
+    border-radius: 5px;
+    background-color: #FFF0F5; /* Very light pink background */
 }
 
 /* Style for list options */
 #listOptions {
     display: flex;
     align-items: center;
-    background-color: #fff;
-    border-radius: 5px;
-    padding: 10px;
+    background-color: #FFF0F5; /* Very light pink background */
+    border-radius: 8px;
+    padding: 12px;
 }
 
 /* Style for select inside list options */
 #listOptions select {
     flex: 1;
     margin-right: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #FFB6C1; /* Soft pink border */
 }
 
 /* Style for button container */
@@ -72,12 +74,18 @@ body {
 /* Style for buttons in list options and button container */
 #listOptions button, #button-container button {
     width: 100%;
-    background-color: #6a1b9a;
+    background-color: #F0B3E0; /* Light purple background */
     color: #fff;
     border: none;
-    padding: 10px;
-    border-radius: 3px;
+    padding: 12px;
+    border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    transition: transform 0.2s; /* Adds a smooth transition */
+}
+
+#listOptions button:hover, #button-container button:hover {
+    transform: scale(1.05); /* Slight increase in size on hover */
 }
 
 /* Style for table container */
@@ -85,8 +93,8 @@ body {
     width: 100%;
     height: 500px;
     overflow: auto;
-    border: 1px solid #ddd;
-    background-color: #fff;
+    border: 1px solid #A79BCB; /* Light purple border */
+    background-color: #FFD1DC; /* Light pink background */
     margin-top: 20px;
 }
 
@@ -113,24 +121,24 @@ body {
 
 /* Style for modal content */
 .modalContent {
-    background-color: #fff;
+    background-color: #FFF0F5; /* Very light pink background */
     padding: 20px;
-    border-radius: 5px;
+    border-radius: 10px; /* More rounded corners */
 }
 
 /* Style for input in modal */
 #modal input {
     width: 100%;
     margin-bottom: 10px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    padding: 10px;
+    border: 1px solid #FFB6C1; /* Soft pink border */
+    border-radius: 5px;
 }
 
 /* Style for selected items */
 .selected {
     cursor: pointer;
-    background-color: #eee;
+    background-color: #B8E0F2; /* Light blue for selected items */
     transition: background-color 0.3s;
 }
 
@@ -138,10 +146,11 @@ body {
 .zoomContent {
     max-height: 400px;
     overflow-y: auto;
-    background-color: #fff;
+    background-color: #FFD1DC; /* Light pink background */
     padding: 20px;
-    border-radius: 5px;
+    border-radius: 8px; /* More rounded corners */
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
+

@@ -697,3 +697,8 @@ function inputSanitization(input){
   //replaces any instances of an illegal character with the regex/their html entities
   return input.replace(regex,(match)=>{return map[match]})
 }
+
+btnLogin.addEventListener("click", () => {
+  console.log("Login button clicked");
+  window.location.href = 'http://localhost:5002'; // URL of the SuperSite
+});
