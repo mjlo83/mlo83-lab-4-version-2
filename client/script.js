@@ -18,6 +18,10 @@ loadedList="";
 searchField = "name";
 n = 5;
 
+//list counter
+let listCount = 19; // Tracks the number of created lists
+const MAX_LISTS = 20; // Maximum allowed lists
+
 //publishers info
 publishers = []
 getPublishers();
@@ -343,6 +347,12 @@ function sort(){
 //create new favourites list
 //called by listModal after name is inputted
 async function createList(listName){
+  // Check if maximum lists limit has been reached
+  console.log("listcount is" + listCount);
+  if (listCount >= MAX_LISTS) {
+    alert("You have reached the maximum number of lists allowed. Please delete lists to create more.");
+    return;
+}
   let response = null; // Define response here
 
   try {
@@ -360,9 +370,13 @@ async function createList(listName){
       const data = await response.json();
       console.log(data);
 
+      listCount++;
+
   } catch (error) {
       console.log("Error:", error);
   }
+
+
 
   // Check response status outside of the catch block
   if (response) {
