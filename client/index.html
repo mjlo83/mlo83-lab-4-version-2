@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Superhero Rolodex</title>
+        <link href="style.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body>
+        <h1 id="title">Nico's Superhero Rolodex</h1>
+        <div id="searchOptions">
+            <input type="text" id="searchBox" placeholder="Search here"> 
+            <button type="button" id="searchBtn">Search</button>
+            <select id="fields">
+                <option value="name">Name</option>
+                <option value="Gender">Gender</option>
+                <option value="Eye color">Eye Colour</option>
+                <option value="Race">Race</option>
+                <option value="Hair color">Hair Colour</option>
+                <option value="Height">Height</option>
+                <option value="Publisher">Publisher</option>
+                <option value="Skin color">Skin Colour</option>
+                <option value="Alignment">Alignment</option>
+                <option value="Weight">Weight</option>
+                <option value="Powers">Powers</option>
+            </select>
+            <button type="button" id="sortBtn">Sort</button>
+            <button type="button" id="togglePowersBtn">Powers?</button>
+            <button type="button" id="zoom">Zoom In</button>
+            <input type="text" id="nBox" placeholder="n">
+            <button type="button" id="publishers">Publishers</button>
+        </div>
+
+       <div id="table-container">
+            <table id="data-table">
+                <!--Dynamic table of searched heroes or loaded list-->
+                <thead id="table-headers">
+
+                </thead>
+                <tbody id="table-body">
+
+                </tbody>
+            </table>
+       </div>
+        <div id="listOptions">
+            <select id="listDropDown">
+                <!--Dynamic list of lists here-->
+            </select>
+            <div id="button-container" >
+                <button type="button" id="createBtn">Create List</button>
+                <button type="button" id="loadBtn">Load List</button>
+                <button type="button" id="addBtn">Add To List</button>
+                <button type="button" id="removeBtn">Remove From List</button>
+                <button type="button" id="deleteBtn">Delete List</button>
+                <button type="button" id="saveBtn">Save</button>
+            </div>
+        </div>
+        <div id="nameModal" class="modal">
+            <div class="modalContent">
+                <p>Enter name for new list:</p>
+                <input type="text" id="listNameBox" placeholder="List Name">
+                <button id="confirmNameBtn">OK</button>
+            </div>
+        </div>
+        <div id="rowModal" class="modal">
+            <!--Content of zoom here-->
+        </div>
+        <div id="publishersModal" class="modal">
+            <!--Content of publishers here-->
+        </div>
+        <script defer src="script.js"></script>
+    </body>
+</html>

@@ -1,0 +1,147 @@
+/* General body style */
+body {
+    background-color: #f5f5f5;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    padding: 10px;
+}
+
+/* Top section containing lists and buttons */
+.top-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Style for the title */
+#title {
+    text-align: center;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    padding: 10px;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Style for search options */
+#searchOptions {
+    display: flex;
+    padding: 10px;
+    background-color: #eee;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+/* Style for inputs, buttons, and selects in search options */
+#searchOptions input[type="text"],
+#searchOptions button[type="button"],
+#searchOptions select {
+    padding: 8px;
+    margin: 5px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Style for list options */
+#listOptions {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+/* Style for select inside list options */
+#listOptions select {
+    flex: 1;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+}
+
+/* Style for button container */
+#button-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+/* Style for buttons in list options and button container */
+#listOptions button, #button-container button {
+    width: 100%;
+    background-color: #6a1b9a;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Style for table container */
+#table-container {
+    width: 100%;
+    height: 500px;
+    overflow: auto;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    margin-top: 20px;
+}
+
+/* Style for data table */
+#data-table {
+    border-collapse: collapse;
+    width: 100%;
+    height: 100%;
+}
+
+/* Style for modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Style for modal content */
+.modalContent {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* Style for input in modal */
+#modal input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Style for selected items */
+.selected {
+    cursor: pointer;
+    background-color: #eee;
+    transition: background-color 0.3s;
+}
+
+/* Style for zoom content */
+.zoomContent {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
