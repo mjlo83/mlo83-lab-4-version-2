@@ -59,7 +59,13 @@
             <div class="modalContent">
                 <p>Enter name for new list:</p>
                 <input type="text" id="listNameBox" placeholder="List Name">
-                <button id="confirmNameBtn">OK</button>
+                <div>
+                    <input type="radio" id="privateList" name="listPrivacy" value="private" checked>
+                    <label for="privateList">Private</label>
+                    <input type="radio" id="publicList" name="listPrivacy" value="public">
+                    <label for="publicList">Public</label>
+                </div>
+                <button id="confirmNameBtn">create list</button>
             </div>
         </div>
 
