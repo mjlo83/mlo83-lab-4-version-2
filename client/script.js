@@ -16,7 +16,7 @@ loadedList="";
 
 //search parameters
 searchField = "name";
-n = 5;
+n = 10;
 
 //list counter
 let listCount = 19; // Tracks the number of created lists
@@ -148,12 +148,16 @@ zoomBtn.addEventListener("click",toggleRowModalVisibility);
 //modal to display row details
 rowModal = document.querySelector("#rowModal")
 
+
 //n box, specifies the number of heroes to return in search
 nBox = document.querySelector("#nBox");
+nButton.addEventListener("click", ()=> {
+  n = nBox.value;
+} )
 nBox.addEventListener("input",()=>{
   //if value is not NaN (double negative), retrieve input after sanitization
   if(!isNaN(nBox.value)){
-    n=inputSanitization(parseInt(nBox.value));
+    n=nBox.value;
   }
 });
 
@@ -349,18 +353,24 @@ function sort(){
 async function createList(listName){
   // Check if maximum lists limit has been reached
   console.log("listcount is" + listCount);
+  
+  
+  
   if (listCount >= MAX_LISTS) {
     alert("You have reached the maximum number of lists allowed. Please delete lists to create more.");
     return;
 }
-  let response = null; // Define response here
+   let isPublic = document.getElementById('publicList').checked;
+   //console.log("list info" + listName + isPublic);
+   //console.log({name: listName, public: isPublic});   
+   let listDescription = document.getElementById('listDescriptionBox').value; 
 
   try {
       // Create new list post request
       response = await fetch(`${BASE_URL}/lists`, {
           method: "POST",
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({name: listName})
+          body: JSON.stringify({name: listName, public: isPublic, description: listDescription})
       });
 
       if (!response.ok) {
@@ -495,6 +505,8 @@ async function deleteList(){
   }catch(error){
     console.log("Error: ",error)
   }
+  listCount--;
+  console.log("new count" + listCount)
 }
 
 //save currently displayed content to backend and save backend lists to JSON

@@ -28,6 +28,8 @@
             <button type="button" id="togglePowersBtn">Powers?</button>
             <button type="button" id="zoom">Zoom In</button>
             <input type="text" id="nBox" placeholder="n">
+            <button type="button" id="nButton">Refine Search</button>
+            
             <button type="button" id="publishers">Publishers</button>
         </div>
 
@@ -64,6 +66,9 @@
                     <label for="privateList">Private</label>
                     <input type="radio" id="publicList" name="listPrivacy" value="public">
                     <label for="publicList">Public</label>
+                    <div>
+                    <textarea id="listDescriptionBox" placeholder="List Description" maxlength="250"></textarea>
+                    </div>
                 </div>
                 <button id="confirmNameBtn">create list</button>
             </div>

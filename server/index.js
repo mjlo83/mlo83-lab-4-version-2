@@ -149,9 +149,10 @@ apiRouter.post("/lists",(req,res)=>{
     //body - object with only name property
     let body = req.body;
     //if proper body sent
-    if(body.hasOwnProperty("name")){
-        //get check if name is already taken
-        listName = body.name;
+    if (body.hasOwnProperty("name") && body.hasOwnProperty("public") && body.hasOwnProperty("description")) {
+        let listName = body.name;
+        let isPublic = body.public;
+        let description = body.description;
         taken = favouriteLists.find(l=>l.name===listName);
         //if not taken, create list and return it
         if(!taken){
