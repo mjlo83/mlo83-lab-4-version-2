@@ -136,7 +136,17 @@ removeBtn.addEventListener("click",function(event){
 
 //Delete list button
 deleteBtn = document.querySelector("#deleteBtn");
-deleteBtn.addEventListener("click",deleteList);
+deleteBtn.addEventListener("click", function(event) {
+    // Ask for confirmation before deleting the list
+    var confirmDeletion = confirm("Are you sure you want to delete this list?");
+    if (confirmDeletion) {
+        // User confirmed the deletion
+        deleteList();
+    } else {
+        // User declined the deletion
+        console.log("List deletion was canceled.");
+    }
+});
 
 //Save list(s) button
 saveBtn = document.querySelector("#saveBtn");
