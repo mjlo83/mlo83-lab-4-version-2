@@ -9,7 +9,9 @@ const BASE_URL = "/api";
 
 
 //the data the table builds off of
+
 heroData=[];
+
 //keeps track of which list is selected and if one is loaded onto the table
 selectedList="";
 loadedList="";
@@ -55,13 +57,24 @@ powersBtn.addEventListener("click",function(event){
 //Search button and box
 searchBtn = document.querySelector("#searchBtn");
 searchBox = document.querySelector("#searchBox");
+// Search button and box
 searchBtn.addEventListener("click",function(event){
-    //get search pattern, search accordingly
-    searchPattern = inputSanitization(searchBox.value);
-    //list not loaded
-    loadedList="";
-    search(searchField,searchPattern,n);
+  // Get the search pattern and sanitize it
+  searchPattern = inputSanitization(searchBox.value);
+
+  // Reset the loaded list
+  loadedList = "";
+
+  // Check if the 'All Fields' option is selected
+  if (searchField === "all") {
+      // Perform an all-field search
+      searchAll(searchPattern, n);
+  } else {
+      // Perform a regular search
+      search(searchField, searchPattern, n);
+  }
 });
+
 
 //Sort button
 sortBtn = document.querySelector("#sortBtn");
@@ -159,17 +172,6 @@ zoomBtn.addEventListener("click",toggleRowModalVisibility);
 rowModal = document.querySelector("#rowModal")
 
 
-//n box, specifies the number of heroes to return in search
-nBox = document.querySelector("#nBox");
-nButton.addEventListener("click", ()=> {
-  n = nBox.value;
-} )
-nBox.addEventListener("input",()=>{
-  //if value is not NaN (double negative), retrieve input after sanitization
-  if(!isNaN(nBox.value)){
-    n=nBox.value;
-  }
-});
 
 //Publishers button
 document.querySelector("#publishers").addEventListener("click",togglePublisherModalVisibility);
@@ -177,6 +179,35 @@ document.querySelector("#publishers").addEventListener("click",togglePublisherMo
 
 
 /*Methods and Async Fetch Methods */
+
+
+
+//search all //////////
+// Enhanced search function to search across all fields
+async function searchAll(pattern, n) {
+  try {
+      // Construct the URL with the search pattern and limit (n)
+      const url = `${BASE_URL}/superheroes/search/all?pattern=${encodeURIComponent(pattern)}&n=${n}`;
+
+      // Fetch request to the backend
+      const response = await fetch(url);
+
+      if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+
+      // Parse the response data
+      data = await response.json();
+      console.log(data);
+      heroData = data;
+
+      // Build the table with the new data
+      buildTable();
+  } catch (error) {
+      console.error("Error: ", error);
+  }
+}
+
 
 
 
@@ -277,26 +308,33 @@ async function populateListDropDown(){
 }
 
 //search the backend for specific heroes
-async function search(field,pattern,n){
+async function search(field, pattern, n){
   try{
+    // Ensure pattern is URL-encoded to handle special characters
+    const encodedPattern = encodeURIComponent(pattern);
+
+    // Construct the URL with encoded pattern
+    const url = `${BASE_URL}/superheroes/search?field=${field}&pattern=${encodedPattern}&n=${n}`;
+
     //search HTTP request
-    const response = await fetch(`${BASE_URL}/superheroes/search?field=${field}&pattern=${pattern}&n=${n}`);
+    const response = await fetch(url);
 
     if(!response.ok){
       throw new Error(`HTTP Error! Status: ${response.status}`);
     }
 
-    //await for parsed data, then set to heroData
-    data = await response.json()
+    // Await for parsed data, then set to heroData
+    const data = await response.json();
     console.log(data);
     heroData = data;
 
-  }catch(error){
-    console.log("Error: ",error)
+  } catch(error) {
+    console.log("Error: ", error);
   }
-  //build table after data has been retrieved
+  // Build table after data has been retrieved
   buildTable();
 }
+
 
 //sort table according to field
 function sort(){
@@ -738,3 +776,10 @@ btnLogin.addEventListener("click", () => {
   console.log("Login button clicked");
   window.location.href = 'http://localhost:5002'; // URL of the SuperSite
 });
+
+//add event listener for Duck Duck Go search button to search selected hero
+ddgBtn.addEventListener("click", function(event){
+  const name = selectedRow.info.name;
+  window.open(`https://duckduckgo.com/?q=${name}+superhero&t=h_&ia=web`);
+})
+

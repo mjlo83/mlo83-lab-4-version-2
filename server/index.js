@@ -60,6 +60,33 @@ superHeroPowers = readJSON("../superhero_powers.json");
 favouriteLists = loadFavouritesLists();
 
 
+// Helper function to create a regex pattern that allows for up to two mismatches
+function createFuzzyMatchPattern(str) {
+    // Escape regex special characters in string
+    str = str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const maxMismatches = 5;
+    let patterns = [str];  // Start with the exact string
+
+    // Function to recursively replace characters with '.'
+    function buildPattern(s, mismatches, startIndex) {
+        if (mismatches > maxMismatches) return;
+
+        for (let i = startIndex; i < s.length; i++) {
+            let pattern = s.substring(0, i) + '.' + s.substring(i + 1);
+            patterns.push(pattern);
+            buildPattern(pattern, mismatches + 1, i + 1);  // Recurse with one more mismatch
+        }
+    }
+
+    buildPattern(str, 0, 0);
+
+    // Deduplicate patterns
+    patterns = [...new Set(patterns)];
+
+    // Join the patterns with '|', meaning "or" in regex
+    return new RegExp(patterns.join('|'), 'i');
+}
 
 
 
@@ -69,21 +96,56 @@ favouriteLists = loadFavouritesLists();
 
 
 //search end point
-apiRouter.get("/superheroes/search",(req,res)=>{
-    //search parameters (n-# of heroes to return, field - attribute to look at, pattern - search pattern)
-    n = req.query.n;
-    field = req.query.field;
-    pattern = req.query.pattern;
+apiRouter.get("/superheroes/search", async (req, res) => {
+    // Original parameters
+    let n = parseInt(req.query.n) || 10;
+    let field = req.query.field;
+    let pattern = req.query.pattern;
 
-    list = search(field,pattern,n);
-    //send list if successful search, else send error code
-    if(list){
-        res.send(list);
+    // Additional parameters from the first API
+    let nameField = req.query.name;
+    let raceField = req.query.race;
+    let powerField = req.query.power;
+    let publisherField = req.query.publisher;
+
+    // Construct query object
+    const query = {};
+
+    if (field && pattern) {
+        // Replace whitespace with a regex that matches any number of whitespace characters
+        pattern = pattern.replace(/\s+/g, '\\s*');
+        query[field] = createFuzzyMatchPattern(pattern);
     }
-    else{
-        res.status(404).send(`No matches found`);
+
+    // Adding functionality from the first API
+    if(nameField && nameField != "empty") query.name = new RegExp(nameField, 'i');
+    if(raceField && raceField != "empty") query.race = new RegExp(raceField, 'i');
+    if(publisherField && publisherField != "empty") query.publisher = new RegExp(publisherField, 'i');
+
+    // For the power field, similar logic as in the first API
+    
+    
+    if (powerField && powerField != "empty") {
+        // ... existing code to find maxSimilarity.power ...
+        powerField = powerField.replace(/\s+/g, '\\s*');
+        query[`Powers.${maxSimilarity.power}`] = createFuzzyMatchPattern(powerField);
+    }
+
+    try {
+        // Perform the search with the constructed query
+        let results = (Object.keys(query).length === 0) ? await Hero.find().limit(n) : await Hero.find(query).limit(n);
+
+        let heroes = results.map(hero => hero); // Simplified from the original forEach loop
+        res.send(heroes);
+    } catch (err) {
+        console.log(err);
+        res.status(404).send("No matches found");
     }
 });
+
+
+
+
 
 //get content from list of ids
 apiRouter.get("/superheroes/content",(req,res)=>{
@@ -156,8 +218,9 @@ apiRouter.post("/lists",(req,res)=>{
         taken = favouriteLists.find(l=>l.name===listName);
         //if not taken, create list and return it
         if(!taken){
-            createList(listName);
+            createList(listName, isPublic, description);
             res.send(getList(listName));
+            console.log("List created"+listName+isPublic+description);
         }
         //else send error code
         else{
@@ -170,7 +233,45 @@ apiRouter.post("/lists",(req,res)=>{
        //error code 
        res.status(400).send("Bad request: list name not recieved");
     }
+    console.log("List created"+listName+isPublic+description);
 });
+
+
+
+
+
+///////////////////////////////////search all
+// Endpoint to search across all fields
+apiRouter.get("/superheroes/search/all", (req, res) => {
+    const pattern = req.query.pattern.toLowerCase();
+    const n = parseInt(req.query.n, 10);
+
+    // Function to search across all fields
+    const allFieldSearch = (hero, pattern) => {
+        return Object.values(hero.info).some(value => String(value).toLowerCase().includes(pattern)) ||
+               Object.values(hero.powers).some(value => String(value).toLowerCase().includes(pattern));
+    };
+
+    // Filter superheroes based on the search pattern across all fields
+    const foundHeroes = heroData.filter(hero => allFieldSearch(hero, pattern));
+    
+    // Debugging: Log the first few found heroes
+    console.log("Found Heroes Sample:", foundHeroes.slice(0, 3));
+
+    // Limit the results if 'n' is provided
+    const limitedResults = n ? foundHeroes.slice(0, n) : foundHeroes;
+
+    // Debugging: Log the response being sent
+    console.log("Response Sample:", limitedResults.slice(0, 3));
+
+    res.json(limitedResults);
+});
+
+
+
+
+
+
 
 //Save a hero's id to an existing list (#6)
 apiRouter.put("/lists/:name",(req,res)=>{
@@ -219,6 +320,75 @@ apiRouter.get("/lists/:name/ids",(req,res)=>{
         res.send(listNames);
     }
 });
+
+// Function to calculate the Levenshtein distance
+// Helper function to calculate the Levenshtein distance
+function levenshteinDistance(a, b) {
+    const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1));
+  
+    for (let i = 0; i <= a.length; i++) {
+      for (let j = 0; j <= b.length; j++) {
+        if (i == 0) dp[i][j] = j;
+        else if (j == 0) dp[i][j] = i;
+        else if (a[i - 1] == b[j - 1]) dp[i][j] = dp[i - 1][j - 1];
+        else dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
+  
+    return dp[a.length][b.length];
+  }
+  
+  
+
+
+const stringSimilarity = require('string-similarity');
+
+apiRouter.get("/superheroes/search", async (req, res) => {
+    // ... existing code ...
+
+    // Adjust the query based on soft-matching requirements
+    if (nameField && nameField !== "empty") {
+        query.name = { $regex: new RegExp(nameField.trim(), 'i') };
+    }
+    if (raceField && raceField !== "empty") {
+        query.race = { $regex: new RegExp(raceField.trim(), 'i') };
+    }
+    if (publisherField && publisherField !== "empty") {
+        query.publisher = { $regex: new RegExp(publisherField.trim(), 'i') };
+    }
+    try {
+        // Retrieve all potential matches from the database
+        let potentialMatches = await Hero.find(query);
+
+        // Filter out the results based on soft-matching criteria
+        let matches = potentialMatches.filter(hero => {
+            // Apply the Levenshtein distance function
+            if (nameField && nameField !== "empty") {
+                const distance = levenshteinDistance(hero.name.toLowerCase(), nameField.toLowerCase());
+                if (distance > 2) return false; // If distance is more than 2, it's not a match.
+            }
+            if (raceField && raceField !== "empty") {
+                const distance = levenshteinDistance(hero.race.toLowerCase(), raceField.toLowerCase());
+                if (distance > 2) return false; // Same check for race.
+            }
+            // ... (apply same logic for other fields like 'powerField' and 'publisherField') ...
+
+            return true; // If all checks pass, it's a match.
+        });
+
+        // Limit the results based on the provided 'n' value
+        matches = matches.slice(0, n);
+
+        res.send(matches);
+    } catch (err) {
+        console.log(err);
+        res.status(404).send("No matches found");
+    }
+});
+
+
+
+
 
 //get a list of heroes and their content
 apiRouter.get("/lists/:name/content",(req,res)=>{
@@ -413,8 +583,9 @@ function createList(listName){
     //create list object
     newList = {
         name:listName,
-        //list of ids
-        list:[]
+        list:[],
+        public: isPublic,
+        description: description
     }
     //add to favouriteLists
     favouriteLists.push(newList);
