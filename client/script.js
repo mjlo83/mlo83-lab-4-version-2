@@ -9,21 +9,18 @@ const BASE_URL = "/api";
 
 
 //the data the table builds off of
-
 heroData=[];
-
 //keeps track of which list is selected and if one is loaded onto the table
 selectedList="";
 loadedList="";
 
 //search parameters
 searchField = "name";
-n = 10;
+n = 5;
 
 //list counter
 let listCount = 19; // Tracks the number of created lists
 const MAX_LISTS = 20; // Maximum allowed lists
-
 //publishers info
 publishers = []
 getPublishers();
@@ -57,28 +54,17 @@ powersBtn.addEventListener("click",function(event){
 //Search button and box
 searchBtn = document.querySelector("#searchBtn");
 searchBox = document.querySelector("#searchBox");
-// Search button and box
 searchBtn.addEventListener("click",function(event){
-  // Get the search pattern and sanitize it
-  searchPattern = inputSanitization(searchBox.value);
-
-  // Reset the loaded list
-  loadedList = "";
-
-  // Check if the 'All Fields' option is selected
-  if (searchField === "all") {
-      // Perform an all-field search
-      searchAll(searchPattern, n);
-  } else {
-      // Perform a regular search
-      search(searchField, searchPattern, n);
-  }
+    //get search pattern, search accordingly
+    searchPattern = inputSanitization(searchBox.value);
+    //list not loaded
+    loadedList="";
+    search(searchField,searchPattern,n);
 });
-
 
 //Sort button
 sortBtn = document.querySelector("#sortBtn");
-sortBtn.addEventListener("click",sort)
+sortBtn.addEventListener("click",sort) 
 
 //Data table
 dataTable = document.querySelector("#dataTable");
@@ -148,6 +134,7 @@ removeBtn.addEventListener("click",function(event){
 });
 
 //Delete list button
+//Delete list button
 deleteBtn = document.querySelector("#deleteBtn");
 deleteBtn.addEventListener("click", function(event) {
     // Ask for confirmation before deleting the list
@@ -161,6 +148,7 @@ deleteBtn.addEventListener("click", function(event) {
     }
 });
 
+
 //Save list(s) button
 saveBtn = document.querySelector("#saveBtn");
 saveBtn.addEventListener("click",saveLists);
@@ -171,7 +159,14 @@ zoomBtn.addEventListener("click",toggleRowModalVisibility);
 //modal to display row details
 rowModal = document.querySelector("#rowModal")
 
-
+//n box, specifies the number of heroes to return in search
+nBox = document.querySelector("#nBox");
+nBox.addEventListener("input",()=>{
+  //if value is not NaN (double negative), retrieve input after sanitization
+  if(!isNaN(nBox.value)){
+    n=inputSanitization(parseInt(nBox.value));
+  }
+});
 
 //Publishers button
 document.querySelector("#publishers").addEventListener("click",togglePublisherModalVisibility);
@@ -180,33 +175,6 @@ document.querySelector("#publishers").addEventListener("click",togglePublisherMo
 
 /*Methods and Async Fetch Methods */
 
-
-
-//search all //////////
-// Enhanced search function to search across all fields
-async function searchAll(pattern, n) {
-  try {
-      // Construct the URL with the search pattern and limit (n)
-      const url = `${BASE_URL}/superheroes/search/all?pattern=${encodeURIComponent(pattern)}&n=${n}`;
-
-      // Fetch request to the backend
-      const response = await fetch(url);
-
-      if (!response.ok) {
-          throw new Error(`HTTP Error! Status: ${response.status}`);
-      }
-
-      // Parse the response data
-      data = await response.json();
-      console.log(data);
-      heroData = data;
-
-      // Build the table with the new data
-      buildTable();
-  } catch (error) {
-      console.error("Error: ", error);
-  }
-}
 
 
 
@@ -307,33 +275,52 @@ async function populateListDropDown(){
   }
 }
 
-//search the backend for specific heroes
-async function search(field, pattern, n){
-  try{
-    // Ensure pattern is URL-encoded to handle special characters
-    const encodedPattern = encodeURIComponent(pattern);
 
-    // Construct the URL with encoded pattern
-    const url = `${BASE_URL}/superheroes/search?field=${field}&pattern=${encodedPattern}&n=${n}`;
+
+//search the backend for specific heroes (this is in script.js)
+
+async function search(field,pattern,n){
+  try{
+
+    // allow for fuzzy search, empty search and case-insensitive
+    // Clean the pattern by making it case-insensitive and trimming whitespace
+    pattern = pattern.trim().toLowerCase();
+  
+
 
     //search HTTP request
-    const response = await fetch(url);
+    const response = await fetch(`${BASE_URL}/superheroes/search?field=${field}&pattern=${pattern}&n=${n}`);
 
     if(!response.ok){
       throw new Error(`HTTP Error! Status: ${response.status}`);
     }
 
-    // Await for parsed data, then set to heroData
-    const data = await response.json();
+    //await for parsed data, then set to heroData
+    data = await response.json()
     console.log(data);
     heroData = data;
 
-  } catch(error) {
-    console.log("Error: ", error);
+  }catch(error){
+    console.log("Error: ",error)
   }
-  // Build table after data has been retrieved
+  //build table after data has been retrieved
   buildTable();
 }
+
+
+
+
+
+
+
+// return back to the rolodex main page in react
+RolodexMain.addEventListener("click", function(event) {
+    // navigate back to rolodex
+    window.open(`http://localhost:3001/Rolodex`);
+});
+
+
+
 
 
 //sort table according to field
@@ -399,26 +386,29 @@ function sort(){
 //create new favourites list
 //called by listModal after name is inputted
 async function createList(listName){
-  // Check if maximum lists limit has been reached
-  console.log("listcount is" + listCount);
+  let response = null; // Define response here
+
+    // Check if maximum lists limit has been reached
+    console.log("listcount is" + listCount);
   
   
   
-  if (listCount >= MAX_LISTS) {
-    alert("You have reached the maximum number of lists allowed. Please delete lists to create more.");
-    return;
-}
-   let isPublic = document.getElementById('publicList').checked;
-   //console.log("list info" + listName + isPublic);
-   //console.log({name: listName, public: isPublic});   
-   let listDescription = document.getElementById('listDescriptionBox').value; 
+    if (listCount >= MAX_LISTS) {
+      alert("You have reached the maximum number of lists allowed. Please delete lists to create more.");
+      return;
+  }
+     let isPublic = document.getElementById('publicList').checked;
+     //console.log("list info" + listName + isPublic);
+     //console.log({name: listName, public: isPublic});   
+     let listDescription = document.getElementById('listDescriptionBox').value; 
+  
 
   try {
       // Create new list post request
       response = await fetch(`${BASE_URL}/lists`, {
           method: "POST",
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({name: listName, public: isPublic, description: listDescription})
+          body: JSON.stringify({name: listName})
       });
 
       if (!response.ok) {
@@ -428,17 +418,9 @@ async function createList(listName){
       const data = await response.json();
       console.log(data);
 
-      listCount++;
-
   } catch (error) {
       console.log("Error:", error);
-
-      if (isPublic) {
-        updatePublicLists(listName, true); // true for adding the list
-    }
   }
-
-
 
   // Check response status outside of the catch block
   if (response) {
@@ -529,8 +511,27 @@ async function removeFromList(hero){
 
 }
 
+
+
+
+//Delete list button
+deleteBtn = document.querySelector("#deleteBtn");
+deleteBtn.addEventListener("click", function(event) {
+    // Ask for confirmation before deleting the list
+    var confirmDeletion = confirm("Are you sure you want to delete this list?");
+    if (confirmDeletion) {
+        // User confirmed the deletion
+        deleteList();
+    } else {
+        // User declined the deletion
+        console.log("List deletion was canceled.");
+    }
+});
+
+
 //delete selected list
 //bug seems to delete first option in listDropDown but not the selectedList, regardless of
+
 async function deleteList(){
   //fetch to delete list endpoint
   try{
@@ -562,58 +563,6 @@ async function deleteList(){
 
   updatePublicLists(selectedList, false); // false for removing the list
 }
-
-
-
-
-function updatePublicLists(listName, addToList) {
-  const publicListsDiv = document.getElementById("publicLists");
-  const MAX_PUBLIC_LISTS = 10;
-
-  if (addToList) {
-      // Check if the maximum limit has been reached
-      if (publicListsDiv.children.length < MAX_PUBLIC_LISTS) {
-          // Add new list name to the box
-          const newList = document.createElement("p");
-          newList.textContent = listName;
-          publicListsDiv.appendChild(newList);
-          
-          
-          
-      } else {
-          alert("Maximum limit of public lists reached. Cannot add more.");
-      }
-  } else {
-      // Remove list name from the box
-      Array.from(publicListsDiv.children).forEach(child => {
-          if (child.textContent === listName) {
-              publicListsDiv.removeChild(child);
-          }
-      });
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -832,14 +781,18 @@ function inputSanitization(input){
   return input.replace(regex,(match)=>{return map[match]})
 }
 
-btnLogin.addEventListener("click", () => {
-  console.log("Login button clicked");
-  window.location.href = 'http://localhost:5002'; // URL of the SuperSite
-});
 
-//add event listener for Duck Duck Go search button to search selected hero
-ddgBtn.addEventListener("click", function(event){
+
+
+// DuckDuckGo search to shows results of a search using the hero name and publisher on the browser
+
+duckDuckGo.addEventListener("click", function(event) {
+  // Get the name of the selected hero
   const name = selectedRow.info.name;
-  window.open(`https://duckduckgo.com/?q=${name}+superhero&t=h_&ia=web`);
-})
+  // Get the publisher of the selected hero
+  const publisher = selectedRow.info.publisher;
 
+  // Open a new tab with the DuckDuckGo search
+  window.open(`https://duckduckgo.com/?q=${name}+ "Marvel Comics"+comic+book&t=h_&ia=web`);
+  
+});
