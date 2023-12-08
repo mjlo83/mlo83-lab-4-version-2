@@ -95,52 +95,151 @@ function createFuzzyMatchPattern(str) {
 /*Endpoints for web app */
 
 
+////search end point
+//apiRouter.get("/superheroes/search",(req,res)=>{
+//    //search parameters (n-# of heroes to return, field - attribute to look at, pattern - search pattern)
+//    n = req.query.n;
+//    field = req.query.field;
+//    pattern = req.query.pattern;
+// 
+//    list = search(field,pattern,n);
+//    //send list if successful search, else send error code
+//    if(list){
+//        res.send(list);
+//    }
+//    else{
+//        res.status(404).send(`No matches found`);
+//    }
+//});
+ 
+ 
+//Query the JSON files
+function search(field,pattern,n=0){
+ 
+    pattern = pattern.toLowerCase();
+    foundHeroes = [];
+    //if powers are being searched
+    if(field=="Powers"){
+        //filter powers
+        matches = superHeroPowers.filter((h)=>{
+            for(const power in h){
+                //if power contains pattern and is true, return
+                if(power.toLowerCase()==pattern && h[power]==="True"){
+                    return true;
+                }
+            }
+            return false;
+        });
+        //for all matches, get corresponding hero info
+        for(let i=0;i<matches.length;i++){
+            foundHeroes.push({
+                info: superHeroInfo.find(s=>s.name===matches[i].hero_names),
+                powers:matches[i]
+            })
+        }
+    }
+    else{
+        //find heroes whose attribute of type field includes pattern
+        matches = superHeroInfo.filter((h)=>{
+            switch(field){
+                case "Gender":
+                    //return true only if matches perfectly (user has to search male or female)
+                    return (h["Gender"].toLowerCase()===String(pattern).toLowerCase())
+                case "Weight":
+                    //only check if pattern is a number (not NaN, double negative I guess)
+                    if(!isNaN(pattern)){
+                        return (h["Weight"]===pattern);
+                    }
+                case "Height":
+                    if(!isNaN(pattern)){
+                        return (h["Height"]===pattern);
+                    }
+                default:
+                    pattern = String(pattern).toLowerCase();
+                    val = h[field].toLowerCase();
+                    return (val.includes(pattern))
+            }
+        });
+        //iterate thru matches, return content including corresponding powers
+        for(let i=0;i<matches.length;i++){
+            foundHeroes.push({
+                info:matches[i],
+                powers:getPowers(matches[i].id)
+            });
+        }
+ 
+    }
+    //if n is given or n is less than the number of matches
+    if(n!=0 && n<matches.length){
+        return foundHeroes.slice(0,n)
+    }
+    console.log(foundHeroes);
+    return foundHeroes;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//1 superhero search
 //search end point
 apiRouter.get("/superheroes/search", async (req, res) => {
-    // Original parameters
-    let n = parseInt(req.query.n) || 10;
-    let field = req.query.field;
-    let pattern = req.query.pattern;
+   // Original parameters
+   let n = parseInt(req.query.n) || 10;
+   let field = req.query.field;
+   let pattern = req.query.pattern;
 
-    // Additional parameters from the first API
-    let nameField = req.query.name;
-    let raceField = req.query.race;
-    let powerField = req.query.power;
-    let publisherField = req.query.publisher;
+   // Additional parameters from the first API
+   let nameField = req.query.name;
+   let raceField = req.query.race;
+   let powerField = req.query.power;
+   let publisherField = req.query.publisher;
 
-    // Construct query object
-    const query = {};
+   // Construct query object
+   const query = {};
 
-    if (field && pattern) {
-        // Replace whitespace with a regex that matches any number of whitespace characters
-        pattern = pattern.replace(/\s+/g, '\\s*');
-        query[field] = createFuzzyMatchPattern(pattern);
-    }
+   if (field && pattern) {
+       // Replace whitespace with a regex that matches any number of whitespace characters
+       pattern = pattern.replace(/\s+/g, '\\s*');
+       query[field] = createFuzzyMatchPattern(pattern);
+   }
 
-    // Adding functionality from the first API
-    if(nameField && nameField != "empty") query.name = new RegExp(nameField, 'i');
-    if(raceField && raceField != "empty") query.race = new RegExp(raceField, 'i');
-    if(publisherField && publisherField != "empty") query.publisher = new RegExp(publisherField, 'i');
+   // Adding functionality from the first API
+   if(nameField && nameField != "empty") query.name = new RegExp(nameField, 'i');
+   if(raceField && raceField != "empty") query.race = new RegExp(raceField, 'i');
+   if(publisherField && publisherField != "empty") query.publisher = new RegExp(publisherField, 'i');
 
-    // For the power field, similar logic as in the first API
-    
-    
-    if (powerField && powerField != "empty") {
-        // ... existing code to find maxSimilarity.power ...
-        powerField = powerField.replace(/\s+/g, '\\s*');
-        query[`Powers.${maxSimilarity.power}`] = createFuzzyMatchPattern(powerField);
-    }
+   // For the power field, similar logic as in the first API
+   
+   
+   if (powerField && powerField != "empty") {
+       // ... existing code to find maxSimilarity.power ...
+       powerField = powerField.replace(/\s+/g, '\\s*');
+       query[`Powers.${maxSimilarity.power}`] = createFuzzyMatchPattern(powerField);
+   }
 
-    try {
-        // Perform the search with the constructed query
-        let results = (Object.keys(query).length === 0) ? await Hero.find().limit(n) : await Hero.find(query).limit(n);
+   try {
+       // Perform the search with the constructed query
+       let results = (Object.keys(query).length === 0) ? await Hero.find().limit(n) : await Hero.find(query).limit(n);
 
-        let heroes = results.map(hero => hero); // Simplified from the original forEach loop
-        res.send(heroes);
-    } catch (err) {
-        console.log(err);
-        res.status(404).send("No matches found");
-    }
+       let heroes = results.map(hero => hero); // Simplified from the original forEach loop
+       res.send(heroes);
+   } catch (err) {
+       console.log(err);
+       res.status(404).send("No matches found");
+   }
 });
 
 
@@ -343,49 +442,76 @@ function levenshteinDistance(a, b) {
 
 const stringSimilarity = require('string-similarity');
 
-apiRouter.get("/superheroes/search", async (req, res) => {
-    // ... existing code ...
+//apiRouter.get("/superheroes/search", async (req, res) => {
+//    // ... existing code ...
+//
+//    // Adjust the query based on soft-matching requirements
+//    if (nameField && nameField !== "empty") {
+//        query.name = { $regex: new RegExp(nameField.trim(), 'i') };
+//    }
+//    if (raceField && raceField !== "empty") {
+//        query.race = { $regex: new RegExp(raceField.trim(), 'i') };
+//    }
+//    if (publisherField && publisherField !== "empty") {
+//        query.publisher = { $regex: new RegExp(publisherField.trim(), 'i') };
+//    }
+//    try {
+//        // Retrieve all potential matches from the database
+//        let potentialMatches = await Hero.find(query);
+//
+//        // Filter out the results based on soft-matching criteria
+//        let matches = potentialMatches.filter(hero => {
+//            // Apply the Levenshtein distance function
+//            if (nameField && nameField !== "empty") {
+//                const distance = levenshteinDistance(hero.name.toLowerCase(), nameField.toLowerCase());
+//                if (distance > 2) return false; // If distance is more than 2, it's not a match.
+//            }
+//            if (raceField & raceField !== "empty") {
+//                const distance = levenshteinDistance(hero.race.toLowerCase(), raceField.toLowerCase());
+//                if (distance > 2) return false; // Same check for race.
+//            }
+//            // ... (apply same logic for other fields like 'powerField' and 'publisherField') ...
+//
+//            return true; // If all checks pass, it's a match.
+//        });
+//
+//        // Limit the results based on the provided 'n' value
+//        matches = matches.slice(0, n);
+//
+//        res.send(matches);
+//    } catch (err) {
+//        console.log(err);
+//        res.status(404).send("No matches found");
+//    }
+//});
+//
 
-    // Adjust the query based on soft-matching requirements
-    if (nameField && nameField !== "empty") {
-        query.name = { $regex: new RegExp(nameField.trim(), 'i') };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+apiRouter.get("/superheroes/:id",(req,res)=>{
+    const heroID = parseInt(req.params.id);
+    //retrieve hero
+    hero = getHeroById(heroID);
+    if(hero){
+        res.send(hero);
     }
-    if (raceField && raceField !== "empty") {
-        query.race = { $regex: new RegExp(raceField.trim(), 'i') };
+    else{
+        res.status(404).send(`No hero with id ${heroID} was found`);
     }
-    if (publisherField && publisherField !== "empty") {
-        query.publisher = { $regex: new RegExp(publisherField.trim(), 'i') };
-    }
-    try {
-        // Retrieve all potential matches from the database
-        let potentialMatches = await Hero.find(query);
 
-        // Filter out the results based on soft-matching criteria
-        let matches = potentialMatches.filter(hero => {
-            // Apply the Levenshtein distance function
-            if (nameField && nameField !== "empty") {
-                const distance = levenshteinDistance(hero.name.toLowerCase(), nameField.toLowerCase());
-                if (distance > 2) return false; // If distance is more than 2, it's not a match.
-            }
-            if (raceField && raceField !== "empty") {
-                const distance = levenshteinDistance(hero.race.toLowerCase(), raceField.toLowerCase());
-                if (distance > 2) return false; // Same check for race.
-            }
-            // ... (apply same logic for other fields like 'powerField' and 'publisherField') ...
-
-            return true; // If all checks pass, it's a match.
-        });
-
-        // Limit the results based on the provided 'n' value
-        matches = matches.slice(0, n);
-
-        res.send(matches);
-    } catch (err) {
-        console.log(err);
-        res.status(404).send("No matches found");
-    }
 });
-
 
 
 

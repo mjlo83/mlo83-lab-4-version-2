@@ -432,6 +432,10 @@ async function createList(listName){
 
   } catch (error) {
       console.log("Error:", error);
+
+      if (isPublic) {
+        updatePublicLists(listName, true); // true for adding the list
+    }
   }
 
 
@@ -555,7 +559,63 @@ async function deleteList(){
   }
   listCount--;
   console.log("new count" + listCount)
+
+  updatePublicLists(selectedList, false); // false for removing the list
 }
+
+
+
+
+function updatePublicLists(listName, addToList) {
+  const publicListsDiv = document.getElementById("publicLists");
+  const MAX_PUBLIC_LISTS = 10;
+
+  if (addToList) {
+      // Check if the maximum limit has been reached
+      if (publicListsDiv.children.length < MAX_PUBLIC_LISTS) {
+          // Add new list name to the box
+          const newList = document.createElement("p");
+          newList.textContent = listName;
+          publicListsDiv.appendChild(newList);
+          
+          
+          
+      } else {
+          alert("Maximum limit of public lists reached. Cannot add more.");
+      }
+  } else {
+      // Remove list name from the box
+      Array.from(publicListsDiv.children).forEach(child => {
+          if (child.textContent === listName) {
+              publicListsDiv.removeChild(child);
+          }
+      });
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //save currently displayed content to backend and save backend lists to JSON
 async function saveLists(list){
